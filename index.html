@@ -203,7 +203,7 @@
       <p>I've never really said this out loud, but I'm not looking for a "better" friend, and I never will be. I don't care what anyone says a friendship should look like. To me, this one, with you, is enough. It always has been.</p>
       <p>I don't want anything to change us. I just want us to keep getting better better at understanding each other, better at showing up for each other, better at fighting <em>for</em> this friendship.</p>
       <p>And if I ever let you down, please don't go quiet on me. Talk to me even if it turns into an argument sometimes. It's the honest fights that keep a friendship alive.</p>
-      <p>There's so much more I want to say, but every time I try to put my feelings into words, they never come out quite well So I'll keep it simple: we were friends, we are now, and hope we always will be. I hope you get everything you wish for. Happy birthday, once again. 🎉</p>
+      <p>There's so much more I want to say, but every time I try to put my feelings into words, they never come out quite well. So I'll keep it simple: I hope you get everything you wish for, and once again Happy birthday, once again. 🎉</p>
       <p class="sign">— Reddy, always ✨</p>
     </div>
     <button class="btn" id="btn-togift">Okay… now the fun part →</button>
@@ -214,17 +214,7 @@
     <div class="eyebrow">Your one job today</div>
     <h1>What do you <span class="script">actually</span> want?</h1>
     <div class="card">
-      <p class="muted">Pick anything, or write your own. Be honest — I mean it.</p>
-      <div class="chips" id="chips"></div>
-
-      <div id="plan-fields" style="display:none">
-        <label for="plan-date">Pick a date for it 📅</label>
-        <input id="plan-date" type="date" />
-        <label for="plan-place">Where should we go?</label>
-        <input id="plan-place" placeholder="A place, or 'you decide!'" autocomplete="off" />
-      </div>
-
-      <label for="gift-note">Or tell me exactly what you want</label>
+      <label for="gift-note">Tell me exactly what you want</label>
       <textarea id="gift-note" placeholder="Type it here… anything at all"></textarea>
       <div class="note-box"><strong>The one rule:</strong> "nothing" is not an acceptable answer. 😌 You don't get to be humble today.</div>
       <div class="err" id="gift-err"></div>
@@ -286,7 +276,7 @@
 /* ============================================================
    CONFIG — change these three lines and nothing else
    ============================================================ */
-var BIRTHDAY   = "2026-08-10T00:00:00"; // midnight, Aug 10 (browser local time)
+var BIRTHDAY   = "2026-07-10T00:00:00"; // midnight, Aug 10 (browser local time)
 var UNLOCK_NOW = false;                   // set true ONLY to preview before the day
 
 // --- ACCESS GATE (only she knows both of these) ---
@@ -443,19 +433,6 @@ $('btn-togift').onclick=function(){show('s-gift');};
 
 /* ---- gift chips ---- */
 var picked=null;
-var box=$('chips');
-GIFT_IDEAS.forEach(function(g){
-  var b=document.createElement('button');
-  b.className='chip';b.type='button';b.textContent=g;
-  b.onclick=function(){
-    var all=box.querySelectorAll('.chip');
-    for(var i=0;i<all.length;i++) all[i].classList.remove('sel');
-    b.classList.add('sel');picked=g;$('gift-err').textContent="";
-    // reveal date + location only for plan-type gifts
-    $('plan-fields').style.display = (NEEDS_PLAN.indexOf(g)!==-1) ? "block" : "none";
-  };
-  box.appendChild(b);
-});
 
 // stop past dates being selectable on the plan date picker (min = today)
 (function(){
@@ -473,38 +450,15 @@ function isRefusal(s){
 
 $('btn-send').onclick=function(){
   var note=$('gift-note').value.trim();
-  var choice=note||picked;
-  if(!choice){
-    $('gift-err').textContent="Pick one, or tell me — you're not getting out of this. 😌";
+  if(!note){
+    $('gift-err').textContent="Tell me — you're not getting out of this. 😌";
     return;
   }
-  // only reject the TYPED box if it's a refusal; chips are always valid choices
-  if(note && isRefusal(note)){
+  if(isRefusal(note)){
     $('gift-err').textContent='Nice try. "'+note+'" is not an acceptable answer today. 😌 Tell me something real.';
     return;
   }
   $('gift-err').textContent="";
-
-  var planDate = $('plan-date') ? $('plan-date').value : "";
-  var planPlace = $('plan-place') ? $('plan-place').value.trim() : "";
-  var planShown = $('plan-fields').style.display==="block";
-
-  // if a plan-type gift is chosen, date AND place are required
-  if(planShown){
-    if(!planDate){
-      $('gift-err').textContent="Almost! Pick a date for it too. 📅";
-      return;
-    }
-    if(!planPlace){
-      $('gift-err').textContent="And where should we go? Fill that in too. 🙂";
-      return;
-    }
-    var today=new Date(); today.setHours(0,0,0,0);
-    if(new Date(planDate) < today){
-      $('gift-err').textContent="Pick a date that hasn't happened yet 😄 (the future, please!)";
-      return;
-    }
-  }
 
   // send her choice to your inbox via Formspree (fails silently if not set up)
   if(FORM_URL && FORM_URL.indexOf("XXXXXXXX")===-1){
@@ -513,18 +467,12 @@ $('btn-send').onclick=function(){
       headers:{"Accept":"application/json","Content-Type":"application/json"},
       body:JSON.stringify({
         who:window._gname||"(name)",
-        gift_choice:choice,
-        picked_chip:picked||"",
-        typed_note:note||"",
-        plan_date:planShown?planDate:"",
-        plan_place:planShown?planPlace:""
+        gift_note:note
       })
     }).catch(function(){/* on-screen confirmation still shown regardless */});
   }
 
-  var extra = (planShown && (planDate||planPlace))
-    ? ' ('+[planDate,planPlace].filter(Boolean).join(' · ')+')' : '';
-  $('done-text').textContent='"'+choice+'"'+extra+" — noted, and I can't wait. Now stop reading this and go enjoy YOUR day. 💛";
+  $('done-text').textContent='"'+note+'" — noted, and I can\'t wait. Now stop reading this and go enjoy YOUR day. 💛';
   show('s-done');
   launchFireworks();
 };
